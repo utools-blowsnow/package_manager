@@ -1,0 +1,12 @@
+{
+	"pluginName": "scoop",
+	"description": "为 Scoop 提供的搜索插件",
+	"preload": "preload.js",
+	"logo": "logo.png",
+	"features": [
+		{
+			"code": "scoop",
+			"cmds":["scoop"]
+		}
+	]
+}
