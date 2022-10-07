@@ -7,6 +7,10 @@
 		{
 			"code": "scoop",
 			"cmds":["scoop"]
+		},
+		{
+			"code": "winget",
+			"cmds":["winget"]
 		}
 	]
 }
