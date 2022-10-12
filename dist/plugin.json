@@ -3,6 +3,7 @@
 	"description": "为 windows 提供的包管理器,支持 scoop / winget ",
 	"preload": "preload.js",
 	"logo": "logo.png",
+	"platform": ["win32"],
 	"features": [
 		{
 			"code": "scoop",
