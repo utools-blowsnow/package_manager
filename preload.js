@@ -1,4 +1,3 @@
-
 const feture = function(type){
     let helper = require('./lib/'+type+'.js');
     return { // 注意：键对应的是 plugin.json 中的 features.code

@@ -1,6 +1,6 @@
 {
-	"pluginName": "scoop",
-	"description": "为 Scoop 提供的搜索插件",
+	"pluginName": "包管理器",
+	"description": "为 windows 提供的包管理器,支持 scoop / winget ",
 	"preload": "preload.js",
 	"logo": "logo.png",
 	"features": [

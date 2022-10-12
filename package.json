@@ -1,9 +1,15 @@
 {
   "name": "scoop-search",
   "version": "1.0.0",
+  "scripts": {
+    "build": "node build.js"
+  },
   "dependencies": {
     "axios": "^0.27.2",
-    "js-yaml": "^4.1.0",
-    "simple-node-logger": "^21.8.12"
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.34.0",
+    "utools-api-types": "^3.0.0"
   }
 }
