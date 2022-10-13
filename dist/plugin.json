@@ -1,6 +1,6 @@
 {
 	"pluginName": "包管理器",
-	"description": "为 windows 提供的包管理器,支持 scoop / winget ",
+	"description": "为 windows 提供的包管理器,支持 scoop / winget / chocolatey",
 	"preload": "preload.js",
 	"logo": "logo.png",
 	"platform": ["win32"],
@@ -12,6 +12,10 @@
 		{
 			"code": "winget",
 			"cmds":["winget"]
+		},
+		{
+			"code": "chocolatey",
+			"cmds":["chocolatey"]
 		}
 	]
 }

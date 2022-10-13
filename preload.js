@@ -43,4 +43,5 @@ const feture = function(type){
 window.exports = {
     "scoop": feture("scoop"),
     "winget": feture("winget"),
+    "chocolatey": feture("chocolatey"),
 }
