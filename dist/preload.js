@@ -103,6 +103,22 @@ const {exec} = __nccwpck_require__(2081);
 
 
 class Scoop{
+    cache(key,data){
+        localStorage.setItem(key, JSON.stringify({
+            time: new Date().getTime(),
+            data: data
+        }));
+    }
+    checkCache(key){
+        if (localStorage.getItem(key)) {
+            let object =  JSON.parse(localStorage.getItem(key));
+            // 判断时间是否过期  1小时
+            if (object.time + 3600 * 1000 > new Date().getTime()) {
+                return object.data;
+            }
+        }
+        return null;
+    }
 
     async #doSearch(word, page = 1, size = 20) {
         let skip = (page - 1) * size;
@@ -134,24 +150,31 @@ class Scoop{
     }
 
     async search(word="", page = 1, size = 100){
+        if (this.checkCache("scoop_" + word + page)) {
+            return this.checkCache("scoop_" + word + page);
+        }
+
         let data = await this.#doSearch(word, page, size);
         let items = [];
-
 
         for (const item of data.value) {
             items.push({
                 title: item.Name + " - v" + item.Version + " - #" + item.Metadata.AuthorName,
                 description: item.Description,
+                icon: item.Homepage ? 'https://favicon.yandex.net/favicon/' + item.Homepage + '?size=32' : './logo.png',
                 info: item
             })
         }
 
-
-        return {
+        let rdata = {
             total: data["@odata.count"],
             totalPage: Math.ceil(data["@odata.count"] / size),
             items: items,
-        }
+        };
+
+        this.cache("scoop_" + word + page, rdata);
+
+        return rdata;
     }
 
     async install(itemData){
@@ -223,6 +246,7 @@ class Winget{
                 items.push({
                     title: appName + " - v" + app.version + " - #" + (local.Publisher ?? local.Author),
                     description: local.Description,
+                    icon: local.PublisherUrl ? 'https://favicon.yandex.net/favicon/' + local.PublisherUrl + '?size=32' : './logo.png',
                     name: appName
                 })
             }
