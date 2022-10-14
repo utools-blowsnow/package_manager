@@ -29,5 +29,15 @@ jobs:
     - run: npm install
     - name: build_winget
       run: node ./winget/build_winget.js
-
+    - name: build_winget_commit
+      run: 
+        git config --global user.email imblowsnow@gmail.com
+        git config --global user.name blowsnow
+        git add .
+        git commit -m "build_winget" -a
+        
+    - name: build_winget_push
+      uses: utools-blowsnow/package_manager@master
+      with:
+        github_token: ${{ secrets.GIT_TOKEN }}
 
