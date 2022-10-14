@@ -35,7 +35,4 @@ jobs:
         git config --global user.name blowsnow
         git add .
         git commit -m "build_winget" -a
-        
-    - name: build_winget_push
-      uses: utools-blowsnow/package_manager@master
-
+        git push
