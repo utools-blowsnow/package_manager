@@ -161,14 +161,15 @@ function handleAppVersion(apps){
 
 async function mainTest() {
 
-    const tempDir = require('os').tmpdir() + "\\winget-pkgs";
+    
+    const tempDir = path.join(require('os').tmpdir(),"winget-pkgs");
     console.log(tempDir);
 
     await cloneManifestRepository(tempDir );
 
     console.log('cloneManifestRepository done');
 
-    traverseDir(tempDir + '\\manifests');
+    traverseDir(path.join(tempDir,"manifests"));
 
     let apps = traverseApps(manifestArray);
 
