@@ -33,6 +33,7 @@ jobs:
       run: |
         git config --global user.email imblowsnow@gmail.com
         git config --global user.name blowsnow
-        git add .
+        git rm -r --cached node_modules
+        git add winget.json
         git commit -m "build_winget" -a
         git push
