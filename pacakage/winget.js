@@ -3,11 +3,11 @@ const fs = require("fs");
 const axios = require("axios");
 const os = require("os");
 
-const apps = require("../winget/winget.json");
+const apps = require("../winget.json");
+const IPackage = require("./IPackage");
 const appNames = Object.keys(apps);
 
-class Winget{
-
+class Winget extends IPackage{
     async search(word="", page = 1, size = 100){
         let items = [];
 
@@ -25,7 +25,7 @@ class Winget{
                 items.push({
                     title: appName + " - v" + app.version + " - #" + (local.Publisher ?? local.Author),
                     description: local.Description,
-                    icon: local.PublisherUrl ? 'https://favicon.yandex.net/favicon/' + local.PublisherUrl + '?size=32' : './logo.png',
+                    icon: this.icon(local.PublisherUrl),
                     name: appName
                 })
             }

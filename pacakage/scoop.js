@@ -2,25 +2,10 @@
 
 const axios = require('axios');
 const {exec} = require("child_process");
+const IPackage = require("./IPackage");
 
 
-class Scoop{
-    cache(key,data){
-        localStorage.setItem(key, JSON.stringify({
-            time: new Date().getTime(),
-            data: data
-        }));
-    }
-    checkCache(key){
-        if (localStorage.getItem(key)) {
-            let object =  JSON.parse(localStorage.getItem(key));
-            // 判断时间是否过期  1小时
-            if (object.time + 3600 * 1000 > new Date().getTime()) {
-                return object.data;
-            }
-        }
-        return null;
-    }
+class Scoop extends IPackage{
 
     async #doSearch(word, page = 1, size = 20) {
         let skip = (page - 1) * size;
@@ -63,7 +48,7 @@ class Scoop{
             items.push({
                 title: item.Name + " - v" + item.Version + " - #" + item.Metadata.AuthorName,
                 description: item.Description,
-                icon: item.Homepage ? 'https://favicon.yandex.net/favicon/' + item.Homepage + '?size=32' : './logo.png',
+                icon: this.icon(item.Homepage),
                 info: item
             })
         }

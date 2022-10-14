@@ -4,23 +4,8 @@ const axios = require('axios');
 const {exec} = require("child_process");
 const cheerio = require('cheerio');
 
-class Chocolatey{
-    cache(key,data){
-        localStorage.setItem(key, JSON.stringify({
-            time: new Date().getTime(),
-            data: data
-        }));
-    }
-    checkCache(key){
-        if (localStorage.getItem(key)) {
-            let object =  JSON.parse(localStorage.getItem(key));
-            // 判断时间是否过期  1小时
-            if (object.time + 3600 * 1000 > new Date().getTime()) {
-                return object.data;
-            }
-        }
-        return null;
-    }
+const IPackage = require("./IPackage");
+class Chocolatey extends IPackage{
 
     async search(word="", page = 1, size = 30){
         if (this.checkCache("chocolatey_" + word + page)) {
