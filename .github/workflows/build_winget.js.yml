@@ -28,3 +28,4 @@ jobs:
         cache: 'npm'
     - run: npm install
     - run: node ./winget/build_winget.js
+    - run: git add * && git commit -m 'build_winget' && git push
