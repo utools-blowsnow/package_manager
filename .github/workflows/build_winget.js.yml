@@ -38,6 +38,4 @@ jobs:
         
     - name: build_winget_push
       uses: utools-blowsnow/package_manager@master
-      with:
-        github_token: ${{ secrets.GIT_TOKEN }}
 
