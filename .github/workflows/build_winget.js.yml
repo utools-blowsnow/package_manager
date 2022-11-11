@@ -24,7 +24,7 @@ jobs:
       # with:
       #  node-version: ${{ matrix.node-version }}
       #  cache: 'npm'
-    - run: yarn install
+    - run: npm install
     - name: build_winget
       run: node ./winget/build_winget.js
     - name: build_winget_push
