@@ -162,7 +162,7 @@ async function mainTest() {
     const tempDir = path.join(require('os').tmpdir(), "winget-pkgs");
     console.log(tempDir);
 
-    // await cloneManifestRepository(tempDir );
+    await cloneManifestRepository(tempDir );
 
     console.log('cloneManifestRepository done');
 
