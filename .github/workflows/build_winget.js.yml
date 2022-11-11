@@ -33,4 +33,4 @@ jobs:
         git config --global user.name blowsnow
         git add winget.json
         git commit -m "bot_build_winget" -a
-        git push
+        git push origin master
