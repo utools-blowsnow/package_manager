@@ -22,15 +22,15 @@ jobs:
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-       node-version: ${{ matrix.node-version }}
-       cache: 'npm'
-    - run: yarn install
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm install
     - name: build_winget
       run: node ./winget/build_winget.js
-    - name: build_winget_push
+    - name: build_winget_commit
       run: |
         git config --global user.email imblowsnow@gmail.com
         git config --global user.name blowsnow
         git add winget.json
-        git commit -m "bot_build_winget" -a
-        git push origin master
+        git commit -m "build_winget" -a
+        git push
