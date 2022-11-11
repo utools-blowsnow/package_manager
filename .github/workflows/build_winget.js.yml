@@ -24,8 +24,7 @@ jobs:
       with:
        node-version: ${{ matrix.node-version }}
        cache: 'npm'
-       cache-dependency-path: './package-lock.json'
-    - run: npm install
+    - run: yarn install
     - name: build_winget
       run: node ./winget/build_winget.js
     - name: build_winget_push
