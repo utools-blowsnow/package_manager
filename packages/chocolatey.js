@@ -36,6 +36,18 @@ class Chocolatey extends IPackage{
             console.log(name,version,command);
         });
 
+
+        // 未安装的话显示安装
+        if (!await this.isInstall()){
+            items.unshift({
+                title: "安装 Chocolatey",
+                description: "未安装 Chocolatey，点击安装",
+                icon: "https://chocolatey.org/assets/images/global-shared/logo-square.svg",
+                name: "chocolatey",
+                command: 'install_package'
+            })
+        }
+
         const data = {
             total: parseInt(total),
             totalPage: Math.ceil(parseInt(total) / size),
@@ -47,29 +59,52 @@ class Chocolatey extends IPackage{
         return data;
     }
 
+    async isInstall(){
+        return await this.doCheckIsInstall("where choco", "\\choco.exe");
+    }
+    getInstallCommand(){
+        let installPath = utools.showOpenDialog({
+            title: '保存安装位置',
+            buttonLabel: '保存',
+            properties: ['openDirectory']
+        })
+
+        if (!installPath){
+            return false;
+        }
+
+        let command = `irm "https://community.chocolatey.org/install.ps1" -outfile '${installPath}\\install.ps1';$env:ChocolateyInstall='${installPath}';${installPath}\\install.ps1;`
+
+        return command;
+    }
+
     async install(itemData){
         return new Promise((resolve, reject) => {
-            var cmdStr = itemData.command;
+            var command = itemData.command;
+            var commandType = 'cmd';
 
-            if (!cmdStr){
-
+            if (!command){
                 reject('无可用安装包');
-
                 return;
+            }
+
+            if (command === 'install_package'){
+                command = this.getInstallCommand();
+                commandType = 'powershell';
+                if (command === false){
+                    reject('取消安装');
+                    return;
+                }
             }
 
             utools.showNotification("开始安装：" + itemData.name);
 
             console.log("开始安装：" + itemData.name + " - " + itemData.command,itemData);
 
-            // 记录一个BUG 同时引用 spawn 和 exec 会导致 utools exec 调用不起来
-            // start powershell.exe -NoExit -command "${cmdStr}"
-            exec(`start cmd.exe /k  "${cmdStr}"`, function(err,stdout,stderr){
-                if(err) {
-                    reject(stderr);
-                } else {
-                    resolve(stdout);
-                }
+            this.execCommand(command, commandType).then((data) => {
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
             })
         })
     }

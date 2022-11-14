@@ -1,3 +1,5 @@
+const {exec} = require("child_process");
+
 class IPackage {
     domain(url) {
         // 从url中提取域名
@@ -29,6 +31,7 @@ class IPackage {
      * @returns {null|*}
      */
     checkCache(key, time = 1000 * 60 * 60) {
+        return false;
         if (localStorage.getItem(key)) {
             let object = JSON.parse(localStorage.getItem(key));
             // 判断时间是否过期  1小时
@@ -44,6 +47,41 @@ class IPackage {
 
     async install(itemData) {}
 
+    async execCommand(command, commandType = 'cmd') {
+        return new Promise((resolve, reject) => {
+            let commandStr = '';
+            if (commandType === 'cmd') {
+                commandStr = `start cmd.exe /k  "${command}"`;
+            }else if (commandType === 'powershell'){
+                commandStr = `start powershell.exe -NoExit -command "${command}"`;
+            }
+            exec(commandStr, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(stdout);
+            });
+        });
+    }
+
+    async doCheckIsInstall(cmd,checkStr){
+        const exec = require('child_process').exec;
+
+        console.log('doCheckIsInstall',cmd,checkStr);
+
+        return new Promise((resolve, reject) => {
+            exec(cmd,function (error, stdout, stderr) {
+                console.log("doCheckIsInstall",cmd,stdout);
+                if (error) {
+                    resolve(false);
+                }
+                resolve(stdout.includes(checkStr));
+            });
+        })
+    }
 }
+
+
+
 
 module.exports = IPackage;

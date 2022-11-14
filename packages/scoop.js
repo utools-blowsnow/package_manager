@@ -37,19 +37,40 @@ class Scoop extends IPackage{
     }
 
     async search(word="", page = 1, size = 100){
-        if (this.checkCache("scoop_" + word + page)) {
-            return this.checkCache("scoop_" + word + page);
+        if (this.checkCache("scoop2_" + word + page)) {
+            return this.checkCache("scoop2_" + word + page);
         }
 
         let data = await this.#doSearch(word, page, size);
         let items = [];
 
         for (const item of data.value) {
+            let repository = item.Metadata.Repository;
+            let bucketName = null;
+            let name = item.Name;
+
+            if (repository.includes("https://github.com/")){
+                bucketName = repository.replace("https://github.com/","").replace("/","_");
+            }
+            let cmdStr = `scoop bucket add ${bucketName} ${repository} & scoop install ${name}`;
+
             items.push({
                 title: item.Name + " - v" + item.Version + " - #" + item.Metadata.AuthorName,
                 description: item.Description,
                 icon: this.icon(item.Homepage),
-                info: item
+                name: item.Name,
+                command: cmdStr
+            })
+        }
+
+        // 未安装的话显示安装
+        if (!await this.isInstall()){
+            items.unshift({
+                title: "安装 Scoop",
+                description: "未安装 Scoop，点击安装",
+                icon: "https://scoop.sh/favicon.ico",
+                name: "scoop",
+                command: 'install_package'
             })
         }
 
@@ -59,39 +80,55 @@ class Scoop extends IPackage{
             items: items,
         };
 
-        this.cache("scoop_" + word + page, rdata);
+        this.cache("scoop2_" + word + page, rdata);
 
         return rdata;
     }
 
+    getInstallCommand(){
+        let installPath = utools.showOpenDialog({
+            title: '保存安装位置',
+            buttonLabel: '保存',
+            properties: ['openDirectory']
+        })
+
+        if (!installPath){
+            return false;
+        }
+
+        let command = `irm "https://ghproxy.com/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installPath}\\install.ps1';${installPath}\\install.ps1 -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps';`
+
+        return command;
+    }
+
     async install(itemData){
         return new Promise((resolve, reject) => {
-            let repository = itemData.info.Metadata.Repository;
-            let bucketName = null;
-            let name = itemData.info.Name;
+            let name = itemData.name;
 
-            if (repository.includes("https://github.com/")){
-                bucketName = repository.replace("https://github.com/","").replace("/","_");
-            }
+            var command = itemData.command;
+            var commandType = 'cmd';
 
-            if (!bucketName){
-                reject("无法识别的仓库地址");
-                return;
+            if (command === 'install_package'){
+                command = this.getInstallCommand();
+                commandType = 'powershell';
+                if (command === false){
+                    reject('取消安装');
+                    return;
+                }
             }
 
             utools.showNotification("开始安装：" + name);
 
-            var cmdStr = `scoop bucket add ${bucketName} ${repository} & scoop install ${name}`;
-
-            // 记录一个BUG 同时引用 spawn 和 exec 会导致 utools exec 调用不起来
-            exec(`start cmd.exe /k "${cmdStr}"`, function(err,stdout,stderr){
-                if(err) {
-                    reject(stderr);
-                } else {
-                    resolve(stdout);
-                }
+            this.execCommand(command, commandType).then((data) => {
+                resolve(data);
+            }).catch((err) => {
+                reject(err);
             })
         })
+    }
+
+    async isInstall(){
+        return await this.doCheckIsInstall("where scoop", "\\shims\\scoop");
     }
 }
 
