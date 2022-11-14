@@ -27,10 +27,10 @@ jobs:
     - run: npm install
     - name: build_winget
       run: node ./winget/build_winget.js
-    - name: build_winget_push
+    - name: build_winget_commit
       run: |
         git config --global user.email imblowsnow@gmail.com
         git config --global user.name blowsnow
         git add winget.json
-        git commit -m "bot_build_winget" -a
+        git commit -m "build_winget" -a
         git push
