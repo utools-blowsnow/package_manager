@@ -63,7 +63,8 @@ class Chocolatey extends IPackage{
             console.log("开始安装：" + itemData.name + " - " + itemData.command,itemData);
 
             // 记录一个BUG 同时引用 spawn 和 exec 会导致 utools exec 调用不起来
-            exec(`start powershell.exe -NoExit -command "${cmdStr}"`, function(err,stdout,stderr){
+            // start powershell.exe -NoExit -command "${cmdStr}"
+            exec(`start cmd.exe /k  "${cmdStr}"`, function(err,stdout,stderr){
                 if(err) {
                     reject(stderr);
                 } else {
