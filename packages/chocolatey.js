@@ -49,13 +49,21 @@ class Chocolatey extends IPackage{
 
     async install(itemData){
         return new Promise((resolve, reject) => {
+            var cmdStr = itemData.command;
+
+            if (!cmdStr){
+
+                reject('无可用安装包');
+
+                return;
+            }
 
             utools.showNotification("开始安装：" + itemData.name);
 
-            var cmdStr = itemData.command;
+            console.log("开始安装：" + itemData.name + " - " + itemData.command,itemData);
 
             // 记录一个BUG 同时引用 spawn 和 exec 会导致 utools exec 调用不起来
-            exec(`start cmd.exe /k "${cmdStr}"`, function(err,stdout,stderr){
+            exec(`start powershell.exe -NoExit -command "${cmdStr}"`, function(err,stdout,stderr){
                 if(err) {
                     reject(stderr);
                 } else {

@@ -1,20 +1,5 @@
-const os = require('os')
-const logger = require('./lib/logger').createLogger(os.tmpdir() + '\\package_manager.log');
-
-const packages = {
-    "scoop": require("./pacakage/scoop.js"),
-    "winget": require("./pacakage/winget.js"),
-    "chocolatey": require("./pacakage/chocolatey.js"),
-}
-
-const feture = function(type){
-    let helper;
-    try {
-        helper = packages[type];
-    }catch (e) {
-        logger.error('error',e);
-        throw e;
-    }
+const feature = function(type){
+    let helper = require('./packages/'+type+'.js');
     return { // 注意：键对应的是 plugin.json 中的 features.code
         mode: "list",  // 列表模式
         args: {
@@ -54,9 +39,9 @@ const feture = function(type){
         }
     }
 }
-
+window = {};
 window.exports = {
-    "scoop": feture("scoop"),
-    "winget": feture("winget"),
-    "chocolatey": feture("chocolatey"),
+    "scoop": feature("scoop"),
+    "winget": feature("winget"),
+    "chocolatey": feature("chocolatey"),
 }
