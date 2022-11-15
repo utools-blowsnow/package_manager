@@ -7,6 +7,11 @@ const IPackage = require("./IPackage");
 
 class Scoop extends IPackage{
 
+
+    constructor() {
+        super();
+    }
+
     async #doSearch(word, page = 1, size = 20) {
         let skip = (page - 1) * size;
 
@@ -92,7 +97,12 @@ class Scoop extends IPackage{
     }
 
     async install(itemData){
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            if (!await this.isInstall()) {
+                utools.showNotification('未安装Scoop，请点我安装', 'installScoop');
+                return;
+            }
+
             let name = itemData.name;
 
             var command = itemData.command;
@@ -111,6 +121,8 @@ class Scoop extends IPackage{
     async isInstall(){
         return await this.doCheckIsInstall("where scoop", "\\shims\\scoop");
     }
+
+
 }
 
 

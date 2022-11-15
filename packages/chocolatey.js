@@ -6,6 +6,9 @@ const cheerio = require('cheerio');
 
 const IPackage = require("./IPackage");
 class Chocolatey extends IPackage{
+    constructor() {
+        super();
+    }
 
     async search(word="", page = 1, size = 30){
         if (this.checkCache("chocolatey_" + word + page)) {
@@ -48,7 +51,6 @@ class Chocolatey extends IPackage{
     }
 
     async isInstall(){
-        console.log('isInstall where choco');
         return await this.doCheckIsInstall("where choco", "\\choco.exe");
     }
 
@@ -69,27 +71,23 @@ class Chocolatey extends IPackage{
     }
 
     async install(itemData){
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            if (!await this.isInstall()) {
+                utools.showNotification('未安装Choco，请点我安装', 'installChocolatey');
+                return;
+            }
             var command = itemData.command;
             var commandType = 'cmd';
 
-            if (!command){
+            if (!command) {
                 reject('无可用安装包');
                 return;
             }
 
-            if (command === 'install_package'){
-                command = this.getInstallCommand();
-                commandType = 'powershell';
-                if (command === false){
-                    reject('取消安装');
-                    return;
-                }
-            }
 
             utools.showNotification("开始安装：" + itemData.name);
 
-            console.log("开始安装：" + itemData.name + " - " + itemData.command,itemData);
+            console.log("开始安装：" + itemData.name + " - " + itemData.command, itemData);
 
             this.execCommand(command, commandType).then((data) => {
                 resolve(data);

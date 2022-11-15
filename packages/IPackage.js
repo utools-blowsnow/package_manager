@@ -42,7 +42,9 @@ class IPackage {
     }
 
 
-    async search(word = "", page = 1, size = 100) {}
+    async search(word = "", page = 1, size = 100) {
+
+    }
 
     async install(itemData) {}
 
@@ -78,6 +80,8 @@ class IPackage {
             });
         })
     }
+
+    async isInstall(){ return true;}
 }
 
 
