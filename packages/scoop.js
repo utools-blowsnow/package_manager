@@ -63,17 +63,6 @@ class Scoop extends IPackage{
             })
         }
 
-        // 未安装的话显示安装
-        if (!await this.isInstall()){
-            items.unshift({
-                title: "安装 Scoop",
-                description: "未安装 Scoop，点击安装",
-                icon: "https://scoop.sh/favicon.ico",
-                name: "scoop",
-                command: 'install_package'
-            })
-        }
-
         let rdata = {
             total: data["@odata.count"],
             totalPage: Math.ceil(data["@odata.count"] / size),
@@ -85,7 +74,7 @@ class Scoop extends IPackage{
         return rdata;
     }
 
-    getInstallCommand(){
+    async installApp(){
         let installPath = utools.showOpenDialog({
             title: '保存安装位置',
             buttonLabel: '保存',
@@ -96,9 +85,10 @@ class Scoop extends IPackage{
             return false;
         }
 
-        let command = `irm "https://ghproxy.com/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installPath}\\install.ps1';${installPath}\\install.ps1 -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps';`
+        let installScriptPath = utools.getPath('downloads') + '/install.ps1';
+        let command = `irm "https://ghproxy.com/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installScriptPath}';${installScriptPath} -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps';`
 
-        return command;
+        return this.execCommand(command, 'powershell');
     }
 
     async install(itemData){
@@ -107,15 +97,6 @@ class Scoop extends IPackage{
 
             var command = itemData.command;
             var commandType = 'cmd';
-
-            if (command === 'install_package'){
-                command = this.getInstallCommand();
-                commandType = 'powershell';
-                if (command === false){
-                    reject('取消安装');
-                    return;
-                }
-            }
 
             utools.showNotification("开始安装：" + name);
 

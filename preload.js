@@ -39,9 +39,34 @@ const feature = function(type){
         }
     }
 }
-window = {};
+
+const featureInstall = function(type){
+    let helper = require('./packages/'+type+'.js');
+    return { // 注意：键对应的是 plugin.json 中的 features.code
+        mode: "none",  // 列表模式
+        args: {
+            // 进入插件应用时调用（可选）
+            enter: async ({ code, type, payload }) => {
+                // action = { code, type, payload }
+                utools.hideMainWindow()
+
+                try {
+                    await helper.installApp();
+                }catch (e){
+                    utools.showNotification("安装失败：" + e.message);
+                }
+
+                // do some thing
+                utools.outPlugin()
+            }
+        }
+    }
+}
 window.exports = {
     "scoop": feature("scoop"),
     "winget": feature("winget"),
     "chocolatey": feature("chocolatey"),
+
+    "installScoop": featureInstall("scoop"),
+    "installChocolatey": featureInstall("chocolatey"),
 }

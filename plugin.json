@@ -16,6 +16,14 @@
 		{
 			"code": "chocolatey",
 			"cmds":["chocolatey"]
+		},
+		{
+			"code": "installScoop",
+			"cmds":["安装scoop"]
+		},
+		{
+			"code": "installChocolatey",
+			"cmds":["安装chocolatey"]
 		}
 	]
 }

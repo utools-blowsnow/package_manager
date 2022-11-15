@@ -31,7 +31,6 @@ class IPackage {
      * @returns {null|*}
      */
     checkCache(key, time = 1000 * 60 * 60) {
-        return false;
         if (localStorage.getItem(key)) {
             let object = JSON.parse(localStorage.getItem(key));
             // 判断时间是否过期  1小时

@@ -36,18 +36,6 @@ class Chocolatey extends IPackage{
             console.log(name,version,command);
         });
 
-
-        // 未安装的话显示安装
-        if (!await this.isInstall()){
-            items.unshift({
-                title: "安装 Chocolatey",
-                description: "未安装 Chocolatey，点击安装",
-                icon: "https://chocolatey.org/assets/images/global-shared/logo-square.svg",
-                name: "chocolatey",
-                command: 'install_package'
-            })
-        }
-
         const data = {
             total: parseInt(total),
             totalPage: Math.ceil(parseInt(total) / size),
@@ -60,9 +48,11 @@ class Chocolatey extends IPackage{
     }
 
     async isInstall(){
+        console.log('isInstall where choco');
         return await this.doCheckIsInstall("where choco", "\\choco.exe");
     }
-    getInstallCommand(){
+
+    async installApp(){
         let installPath = utools.showOpenDialog({
             title: '保存安装位置',
             buttonLabel: '保存',
@@ -72,10 +62,10 @@ class Chocolatey extends IPackage{
         if (!installPath){
             return false;
         }
+        let installScriptPath = utools.getPath('downloads') + '/chocolateyInstall.ps1';
+        let command = `irm "https://community.chocolatey.org/install.ps1" -outfile '${installScriptPath}';$env:ChocolateyInstall='${installPath}';${installScriptPath};`
 
-        let command = `irm "https://community.chocolatey.org/install.ps1" -outfile '${installPath}\\install.ps1';$env:ChocolateyInstall='${installPath}';${installPath}\\install.ps1;`
-
-        return command;
+        return this.execCommand(command, 'powershell');
     }
 
     async install(itemData){
