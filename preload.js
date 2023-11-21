@@ -67,6 +67,7 @@ window.exports = {
     "winget": feature("winget"),
     "chocolatey": feature("chocolatey"),
 
+    // "installWinget": featureInstall("winget"),
     "installScoop": featureInstall("scoop"),
     "installChocolatey": featureInstall("chocolatey"),
 }

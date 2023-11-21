@@ -13,7 +13,7 @@ class Winget extends IPackage{
 
     async downloadAppData(wingetJsonPath,wingetUpdatePath){
         // 从网络获取最新的 winget 应用列表
-        let res = await axios.get("https://ghproxy.com/https://raw.githubusercontent.com/utools-blowsnow/package_manager/master/winget.json");
+        let res = await this.downloadByGithub("https://raw.githubusercontent.com/utools-blowsnow/package_manager/master/winget.json");
         let data = res.data;
 
         // 保存到本地
@@ -102,6 +102,10 @@ class Winget extends IPackage{
     }
 
     async install(itemData){
+        if (!await this.isInstall()) {
+            utools.showNotification('未安装winget');
+            return;
+        }
         return new Promise((resolve, reject) => {
 
             utools.showNotification("开始安装：" + itemData.name);
@@ -117,6 +121,15 @@ class Winget extends IPackage{
                 }
             })
         })
+    }
+
+    async installApp() {
+        let command = `Install-Module -Name Microsoft.WinGet.Client`
+        return this.execCommand(command, 'powershell');
+    }
+
+    async isInstall() {
+        return await this.doCheckIsInstall("where winget", "\\winget");
     }
 }
 

@@ -71,11 +71,11 @@ class Chocolatey extends IPackage{
     }
 
     async install(itemData){
+        if (!await this.isInstall()) {
+            utools.showNotification('未安装Choco，请点我安装', 'installChocolatey');
+            return;
+        }
         return new Promise(async (resolve, reject) => {
-            if (!await this.isInstall()) {
-                utools.showNotification('未安装Choco，请点我安装', 'installChocolatey');
-                return;
-            }
             var command = itemData.command;
             var commandType = 'cmd';
 

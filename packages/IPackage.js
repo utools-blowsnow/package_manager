@@ -1,4 +1,5 @@
 const {exec} = require("child_process");
+const axios = require("axios");
 
 class IPackage {
     domain(url) {
@@ -46,7 +47,9 @@ class IPackage {
 
     }
 
-    async install(itemData) {}
+    async install(itemData) {
+
+    }
 
     async execCommand(command, commandType = 'cmd') {
         return new Promise((resolve, reject) => {
@@ -82,6 +85,13 @@ class IPackage {
     }
 
     async isInstall(){ return true;}
+
+    async downloadByGithub(githubUrl) {
+        return await Promise.race([
+            axios.get("https://ghps.cc/" + githubUrl),
+            axios.get("https://hub.gitmirror.com/" + githubUrl)
+        ]);
+    }
 }
 
 

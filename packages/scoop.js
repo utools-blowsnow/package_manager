@@ -20,7 +20,7 @@ class Scoop extends IPackage{
             method: 'post',
             responseType: 'json',
             headers:{
-                'Referer': 'https://scoop.sh/',
+                // 'Referer': 'https://scoop.sh/',
                 'api-key': 'DC6D2BBE65FC7313F2C52BBD2B0286ED'
             },
             data: {
@@ -31,8 +31,8 @@ class Scoop extends IPackage{
                 "orderby": "search.score() asc, Metadata/OfficialRepositoryNumber asc, NameSortable desc",
                 "skip": skip,
                 "top": size,
-                "select": "Id,Name,NamePartial,NameSuffix,Description,Homepage,License,Version,Metadata/Repository,Metadata/FilePath,Metadata/AuthorName,Metadata/OfficialRepository,Metadata/RepositoryStars,Metadata/Committed,Metadata/Sha",
-                "highlight": "Name,NamePartial,NameSuffix,Description,Version,License,Metadata/Repository,Metadata/AuthorName",
+                "select": "Id,Name,NamePartial,NameSuffix,Description,Homepage,License,Version,Metadata/Repository,Metadata/FilePath,Metadata/OfficialRepository,Metadata/RepositoryStars,Metadata/Committed,Metadata/Sha",
+                "highlight": "Name,NamePartial,NameSuffix,Description,Version,License,Metadata/Repository",
                 "highlightPreTag": "<mark>",
                 "highlightPostTag": "</mark>"
             }
@@ -60,7 +60,7 @@ class Scoop extends IPackage{
             let cmdStr = `scoop bucket add ${bucketName} ${repository} & scoop install ${name}`;
 
             items.push({
-                title: item.Name + " - v" + item.Version + " - #" + item.Metadata.AuthorName,
+                title: item.Name + " - v" + item.Version,
                 description: item.Description,
                 icon: this.icon(item.Homepage),
                 name: item.Name,
@@ -81,7 +81,7 @@ class Scoop extends IPackage{
 
     async installApp(){
         let installPath = utools.showOpenDialog({
-            title: '保存安装位置',
+            title: '保存Scoop安装位置',
             buttonLabel: '保存',
             properties: ['openDirectory']
         })
@@ -91,12 +91,16 @@ class Scoop extends IPackage{
         }
 
         let installScriptPath = utools.getPath('downloads') + '/install.ps1';
-        let command = `irm "https://ghproxy.com/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installScriptPath}';${installScriptPath} -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps';`
+        let command = `irm "https://ghps.cc/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installScriptPath}';${installScriptPath} -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps' -RunAsAdmin;`
 
         return this.execCommand(command, 'powershell');
     }
 
     async install(itemData){
+        if (!await this.isInstall()) {
+            utools.showNotification('未安装scoop，请点我安装', 'installScoop');
+            return;
+        }
         return new Promise(async (resolve, reject) => {
             if (!await this.isInstall()) {
                 utools.showNotification('未安装Scoop，请点我安装', 'installScoop');
