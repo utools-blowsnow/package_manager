@@ -59,46 +59,186 @@ class Winget extends IPackage{
         return data;
     }
 
+    icon(url, defaultIcon = './logo.png', size = 32) {
+        if (!url) return defaultIcon;
+        if (url.toLowerCase() === 'winget'){
+            return 'https://favicon.yandex.net/favicon/microsoft.com?size=' + size;
+        }else if (url.toLowerCase() === 'localpc'){
+            return 'https://favicon.yandex.net/favicon/microsoft.com?size=' + size;
+        }else if (url.toLowerCase() === 'msstore'){
+            return 'https://favicon.yandex.net/favicon/microsoft.com?size=' + size;
+        }else if (url.toLowerCase() === 'android'){
+            return 'https://favicon.yandex.net/favicon/android.com?size=' + size;
+        }else if (url.toLowerCase() === 'steam'){
+            return 'https://favicon.yandex.net/favicon/steam.com?size=' + size;
+        }else if (url.toLowerCase() === 'gog'){
+            return 'https://favicon.yandex.net/favicon/google.com?size=' + size;
+        }else if (url.toLowerCase() === 'uplay'){
+            return 'https://favicon.yandex.net/favicon/uplay.com?size=' + size;
+        }
+        return defaultIcon;
+    }
+
+    parseWingetSearch(out){
+        let rawOutput = "";
+        let hasShownId = false;
+        let noSourcesAvailable = false;
+        let idPosition, versionPosition, sourcePosition;
+        let packages = [];
+
+        out.split("\n").forEach((line) => {
+            if (line) {
+                rawOutput += line;
+
+                if (!hasShownId) {
+                    if (line.includes(" Id ")) {
+                        line = line.substring(line.indexOf("Name"))
+
+                        hasShownId = true;
+
+                        idPosition = line.split("Id")[0].length;
+                        versionPosition = line.split("Version")[0].length;
+                        sourcePosition = line.split("Source")[0].length;
+
+                        if (line.length === sourcePosition) {
+                            noSourcesAvailable = true;
+                            console.log("🟡 Winget reported no sources on getPackagesForQuery");
+                        }
+                    }else if (line.includes(" ID ")) {
+                        line = line.substring(line.indexOf("名称"))
+
+                        hasShownId = true;
+
+                        idPosition = line.split("ID")[0].length;
+                        versionPosition = line.split("版本")[0].length;
+                        sourcePosition = line.split("源")[0].length;
+
+                        if (line.length === sourcePosition) {
+                            noSourcesAvailable = true;
+                            console.log("🟡 Winget reported no sources on getPackagesForQuery");
+                        }
+                    }
+                } else if (line.includes("---")) {
+                    // Do nothing for lines containing "---"
+                } else {
+                    try {
+                        let name = line.slice(0, idPosition).trim();
+                        let idVersionSubstr = line.slice(idPosition).trim();
+
+                        if (name.includes("  ")) {
+                            let oName = name;
+
+                            while (oName.includes("  ")) {
+                                oName = oName.replace("  ", " ");
+                            }
+
+                            idVersionSubstr = oName.split(" ").pop() + idVersionSubstr;
+                            name = oName.split(" ").slice(0, -1).join(" ");
+                        }
+
+                        idVersionSubstr = idVersionSubstr.replace(/\t/g, " ");
+
+                        while (idVersionSubstr.includes("  ")) {
+                            idVersionSubstr = idVersionSubstr.replace("  ", " ");
+                        }
+
+                        let iOffset = 0;
+                        let id = idVersionSubstr.split(" ")[iOffset];
+                        let ver = idVersionSubstr.split(" ")[iOffset + 1];
+                        let source = "";
+                        let tag = "";
+
+                        if (!noSourcesAvailable) {
+                            source = idVersionSubstr.split(" ")[iOffset + 2];
+                        }
+
+                        if (id.length === 1) {
+                            iOffset += 1;
+                            id = idVersionSubstr.split(" ")[iOffset];
+                            ver = idVersionSubstr.split(" ")[iOffset + 1];
+
+                            if (!noSourcesAvailable) {
+                                source = idVersionSubstr.split(" ")[iOffset + 2];
+                            }
+                        }
+
+                        if (ver.trim() === "<" || ver.trim() === "-") {
+                            iOffset += 1;
+                            ver = idVersionSubstr.split(" ")[iOffset + 1];
+
+                            if (!noSourcesAvailable) {
+                                source = idVersionSubstr.split(" ")[iOffset + 2];
+                            }
+                        }
+
+                        if (noSourcesAvailable) {
+                            source = "Winget";
+                        } else if (source.trim() === "") {
+                            source = "Winget";
+                        }
+
+                        if (source.includes("Tag") || source.includes("Moniker") || source.includes("Command")) {
+                            source = "Winget";
+                        }
+
+                        source = source.trim();
+
+                        if (!name.includes("  ")) {
+                            packages.push({name, id, ver, source});
+                        } else {
+                            name = name.replace(/  /g, "#").replace(/# /g, "#").replace(/ #/g, "#");
+
+                            while (name.includes("##")) {
+                                name = name.replace("##", "#");
+                            }
+
+                            console.log(`🟡 package ${name} failed parsing, going for method 2...`);
+                            packages.push({name, id, ver, source});
+                        }
+                    } catch (e) {
+                        packages.push({name: line.slice(0, idPosition).trim(), id: line.slice(idPosition, versionPosition).trim(), ver: line.slice(versionPosition, sourcePosition).trim(), source: `Winget: ${line.slice(sourcePosition).trim()}`});
+
+                    }
+                }
+
+            }
+        });
+
+        return packages;
+    }
+
     async search(word="", page = 1, size = 100){
-        apps = await this.initApps();
-
-        const appNames = Object.keys(apps);
-
-        console.log('appNames', appNames);
+        if (!await this.isInstall()) {
+            utools.showNotification('未安装winget');
+            return;
+        }
+        if (word === "") word = "google";
+        if (this.checkCache("winget_" + word + page)) {
+            return this.checkCache("winget_" + word + page);
+        }
+        let command = `winget search ${word} --exact --accept-source-agreements`;
+        let out = await this.execCommandNowait(command);
+        let packages = this.parseWingetSearch(out);
 
         let items = [];
-
-        appNames.forEach((appName,index) => {
-
-            let app = apps[appName];
-            // console.log(app.version,app.versions);
-            let appVersion = app.versions[app.version];
-            let locals = appVersion.locals;
-            // 优先中文
-            let local = locals['zh-CN'] ?? locals[appVersion.DefaultLocale ?? 'en-US'];
-            if (!local) {
-                return;
-            }
-
-            let description = local.Description ?? local.ShortDescription ?? "";
-
-            if (appName.toLowerCase().includes(word.toLowerCase()) || description.toLowerCase().includes(word.toLowerCase()) || word === "") {
-
-                items.push({
-                    title: appName + " - v" + app.version + " - #" + (local.Publisher ?? local.Author),
-                    description: description,
-                    icon: this.icon(local.PublisherUrl),
-                    name: appName
-                })
-            }
+        packages.forEach((item,index) => {
+            items.push({
+                title: item.name + " - " + item.ver + " - #" + item.source,
+                description: item.id,
+                icon: this.icon(item.source),
+                name: item.name
+            })
         })
 
-
-        return {
-            total: appNames.length,
-            totalPage: Math.ceil(appNames.length / size),
+        let rdata = {
+            total: items.length,
+            totalPage: 1,
             items: items,
         }
+
+        this.cache("winget_" + word + page, rdata);
+
+        return rdata;
     }
 
     async install(itemData){
@@ -108,9 +248,19 @@ class Winget extends IPackage{
         }
         return new Promise((resolve, reject) => {
 
+            let installPath = utools.showOpenDialog({
+                title: '保存程序安装位置',
+                buttonLabel: '保存',
+                properties: ['openDirectory']
+            })
+
+            if (!installPath){
+                return false;
+            }
+
             utools.showNotification("开始安装：" + itemData.name);
 
-            var cmdStr = `winget install ${itemData.name}`;
+            var cmdStr = `winget install ${itemData.name} -i -l "${installPath}"`;
 
             // 记录一个BUG 同时引用 spawn 和 exec 会导致 utools exec 调用不起来
             exec(`start cmd.exe /k "${cmdStr}"`, function(err,stdout,stderr){

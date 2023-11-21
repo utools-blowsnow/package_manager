@@ -68,6 +68,17 @@ class IPackage {
         });
     }
 
+    async execCommandNowait(command) {
+        return new Promise((resolve, reject) => {
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(stdout);
+            });
+        });
+    }
+
     async doCheckIsInstall(cmd,checkStr){
         const exec = require('child_process').exec;
 

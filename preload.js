@@ -1,5 +1,6 @@
 const feature = function(type){
     let helper = require('./packages/'+type+'.js');
+    let id = null;
     return { // 注意：键对应的是 plugin.json 中的 features.code
         mode: "list",  // 列表模式
         args: {
@@ -12,8 +13,15 @@ const feature = function(type){
             },
             // 子输入框内容变化时被调用 可选 (未设置则无搜索)
             search: async (action, searchWord, callbackSetList) => {
+                let taskId = Math.random().toString(36).substr(2);
+                // 随机ID
+                id = taskId;
                 // 获取一些数据
                 let items = (await helper.search(searchWord)).items;
+
+                if (id !== taskId) {
+                    return;
+                }
                 // 执行 callbackSetList 显示出来
                 callbackSetList(items)
             },
