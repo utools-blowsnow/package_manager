@@ -91,7 +91,7 @@ class Scoop extends IPackage{
         }
 
         let installScriptPath = utools.getPath('downloads') + '/install.ps1';
-        let command = `irm "https://ghps.cc/https://raw.githubusercontent.com/scoopinstaller/install/master/install.ps1" -outfile '${installScriptPath}';${installScriptPath} -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps' -RunAsAdmin;`
+        let command = `irm "get.scoop.sh" -outfile '${installScriptPath}';${installScriptPath} -ScoopDir '${installPath}' -ScoopGlobalDir '${installPath}\\Apps' -RunAsAdmin;`
 
         return this.execCommand(command, 'powershell');
     }
